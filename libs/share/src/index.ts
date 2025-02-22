@@ -1,4 +1,4 @@
 export * from './share.module';
-export * from './constants'
+export * from './common/constants'
 
-export * from './configuration/configuration.module'
+export * from './modules/configuration/configuration.module'
