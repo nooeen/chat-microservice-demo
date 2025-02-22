@@ -1,9 +1,6 @@
 import * as Joi from "joi";
-import {
-  HOST_SCHEMA,
-  PORT_SCHEMA,
-} from "@app/share/configuration/schemas/common.schema";
-import { RedisConfigType } from "@app/share/configuration/redis.config";
+import { HOST_SCHEMA, PORT_SCHEMA } from "./common.schema";
+import { RedisConfigType } from "../redis.config";
 
 export function redisConfigSchema(
   required = false,

@@ -1,7 +1,7 @@
 import * as Joi from "joi";
-import { HOST_SCHEMA } from "@app/share/configuration/schemas/common.schema";
-import { redisConfigSchema } from "@app/share/configuration/schemas/redis.schema";
-import { MongoDBConfigType } from "@app/share/configuration/mongodb.config";
+import { HOST_SCHEMA } from "./common.schema";
+import { redisConfigSchema } from "./redis.schema";
+import { MongoDBConfigType } from "../mongodb.config";
 
 export function mongodbConfigSchema(
   required = false,
