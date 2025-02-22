@@ -3,8 +3,8 @@ import { Prop } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 
 @Schema({
-  _id: false,
-  id: false,
+  // _id: false,
+  // id: false,
   timestamps: {
     createdAt: "created_at",
     updatedAt: "updated_at",

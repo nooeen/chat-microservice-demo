@@ -4,12 +4,16 @@ import { JwtService } from '@nestjs/jwt';
 import { RpcException } from '@nestjs/microservices';
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService, private userService: UserService) {}
+  constructor(private jwtService: JwtService, private userService: UserService) { }
 
   async register(user: { username: string; password: string }) {
     const userExists = await this.userService.findOne({ filter: { username: user.username } });
+    
     if (userExists) {
-      throw new RpcException('User already exists');
+      throw new RpcException({
+        statusCode: 400,
+        message: 'User already exists',
+      });
     }
 
     const createdUser = await this.userService.create(user);
@@ -23,11 +27,17 @@ export class AuthService {
   async validateUser(user: { username: string; password: string }) {
     const userExists = await this.userService.findOne({ filter: { username: user.username } });
     if (!userExists) {
-      throw new RpcException('User not found');
+      throw new RpcException({
+        statusCode: 400,
+        message: 'User not found',
+      });
     }
 
     if (userExists.password !== user.password) {
-      throw new RpcException('Invalid password');
+      throw new RpcException({
+        statusCode: 400,
+        message: 'Invalid password',
+      });
     }
 
     return userExists;

@@ -4,9 +4,19 @@ import { AuthModule } from './auth.module';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMQConfigType } from '@app/share/modules/configuration/configs/rabbitmq.config';
 import { CONFIG_KEYS } from '@app/share';
+import { ValidationPipe } from '@nestjs/common';
+import { CustomRpcExceptionFilter } from '@app/share/filters/rpc-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AuthModule);
   const configService = app.get<ConfigService>(ConfigService);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+
+  app.useGlobalFilters(new CustomRpcExceptionFilter());
 
   app.connectMicroservice<MicroserviceOptions>(
     {
@@ -18,6 +28,9 @@ async function bootstrap() {
           durable: true,
         },
       },
+    },
+    {
+      inheritAppConfig: true,
     },
   );
 

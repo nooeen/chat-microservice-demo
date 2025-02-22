@@ -1,26 +1,27 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiService } from './api.service';
 import { LocalAuthGuard } from './guards/local.guard';
 import { API_PATHS } from '@app/share';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { RegisterBodyDto } from './dto/register-body.dto';
 @Controller()
 export class ApiController {
   constructor(private readonly apiService: ApiService) {}
 
   @Post(API_PATHS.REGISTER)
-  register(@Body() body: { username: string; password: string }) {
+  register(@Body() body: RegisterBodyDto) {
     return this.apiService.register(body);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post(API_PATHS.LOGIN)
-  login(@Body() body: { username: string }) {
-    return this.apiService.login(body);
+  login(@Request() req) {
+    return req.user;
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(API_PATHS.VALIDATE_TOKEN)
-  validateToken(@Body() body: { token: string }) {
-    return this.apiService.validateToken(body);
+  @Get(API_PATHS.VALIDATE)
+  validateToken(@Request() req) {
+    return req.user;
   }
 }

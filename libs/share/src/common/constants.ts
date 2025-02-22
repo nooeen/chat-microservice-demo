@@ -15,7 +15,7 @@ export const MICROSERVICE_KEYS = {
 export const API_PATHS = {
   REGISTER: "register",
   LOGIN: "login",
-  VALIDATE_TOKEN: "validate-token",
+  VALIDATE: "validate",
 };
 
 export const AUTH_COMMANDS = {

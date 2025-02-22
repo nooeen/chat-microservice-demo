@@ -13,14 +13,11 @@ import { UserService } from './users.service';
         const schema = UserSchema;
         schema.pre('find', function () {
           this.where({
-            $or: [
-              { is_deleted: false },
-              { is_deleted: null },
-            ], deleted_at: null,
+            deleted_at: null,
           });
         });
         schema.pre('findOne', function () {
-          this.where({ is_deleted: false, deleted_at: null });
+          this.where({ deleted_at: null });
         });
         return schema;
       },

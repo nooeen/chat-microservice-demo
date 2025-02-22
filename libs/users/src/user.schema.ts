@@ -1,10 +1,11 @@
 import { BaseSchema } from "@app/share";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Types } from "mongoose";
+import { nanoid } from "nanoid";
 
 @Schema({
-  _id: false,
-  id: false,
+  // _id: false,
+  // id: false,
   timestamps: {
     createdAt: "created_at",
     updatedAt: "updated_at",
