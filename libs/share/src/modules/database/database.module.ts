@@ -5,6 +5,7 @@ import { logExecutionTime } from "mongoose-execution-time";
 import { applySpeedGooseCacheLayer } from "speedgoose";
 import mongoose from "mongoose";
 import { MongoDBConfigType } from "../configuration/configs/mongodb.config";
+import { CONFIG_KEYS } from "../../common/constants";
 
 @Module({
   imports: [
@@ -12,7 +13,9 @@ import { MongoDBConfigType } from "../configuration/configs/mongodb.config";
       useFactory: async (configService: ConfigService) => {
         mongoose.plugin(logExecutionTime);
 
-        const mongoDBConfig = configService.get<MongoDBConfigType>("mongodb");
+        const mongoDBConfig = configService.get<MongoDBConfigType>(
+          CONFIG_KEYS.MONGODB
+        );
 
         if (
           mongoDBConfig.cacheEnable &&
