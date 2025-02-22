@@ -4,13 +4,13 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
-import { CONFIG_KEYS, ShareModule, ConfigurationModule } from '@app/share';
+import { CONFIG_KEYS, ShareModule } from '@app/share';
+import { UsersModule } from '@app/users';
 
 @Module({
   imports: [
     ShareModule,
     JwtModule.registerAsync({
-      imports: [ConfigurationModule],
       useFactory: async (configService: ConfigService) => {
         const jwtConfig = configService.get(CONFIG_KEYS.JWT);
         return {
@@ -20,6 +20,7 @@ import { CONFIG_KEYS, ShareModule, ConfigurationModule } from '@app/share';
       },
       inject: [ConfigService],
     }),
+    UsersModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
