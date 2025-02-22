@@ -12,6 +12,7 @@ import { CONFIG_KEYS } from '@app/share';
   imports: [ShareModule, ClientsModule.registerAsync([
     {
       name: MICROSERVICE_KEYS.AUTH,
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         transport: Transport.RMQ,
         options: {

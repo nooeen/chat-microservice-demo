@@ -25,7 +25,7 @@ import { LocalStrategy } from '../../api/src/guards/local.strategy';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy],
+  providers: [AuthService],
   exports: [AuthService],
 })
 export class AuthModule {} 

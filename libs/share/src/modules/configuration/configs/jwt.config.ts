@@ -1,11 +1,13 @@
+import { CONFIG_KEYS } from "@app/share/common/constants";
+
 export type JWTConfigType = {
   secret: string;
   expiresIn: string;
 };
 
 export const buildJWTConfig = (
-  configKeymap = "jwt",
-  configPrefix = "JWT",
+  configKeymap = CONFIG_KEYS.JWT,
+  configPrefix = CONFIG_KEYS.JWT,
   configKeys = null
 ) => {
   let keys: { [x in keyof JWTConfigType]: string } = {

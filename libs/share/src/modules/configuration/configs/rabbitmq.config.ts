@@ -1,11 +1,13 @@
+import { CONFIG_KEYS } from "@app/share/common/constants";
+
 export type RabbitMQConfigType = {
   uri: string;
   queue: string;
 };
 
 export const buildRabbitMQConfig = (
-  configKeymap = "rabbitmq",
-  configPrefix = "RABBITMQ",
+  configKeymap = CONFIG_KEYS.RABBITMQ,
+  configPrefix = CONFIG_KEYS.RABBITMQ,
   configKeys = null
 ) => {
   let keys: { [x in keyof RabbitMQConfigType]: string } = {

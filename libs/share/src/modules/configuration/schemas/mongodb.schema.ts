@@ -2,10 +2,10 @@ import * as Joi from "joi";
 import { HOST_SCHEMA } from "./common.schema";
 import { redisConfigSchema } from "./redis.schema";
 import { MongoDBConfigType } from "../configs/mongodb.config";
-
+import { CONFIG_KEYS } from "@app/share/common/constants";
 export function mongodbConfigSchema(
   required = false,
-  configPrefix = "MONGODB",
+  configPrefix = CONFIG_KEYS.MONGODB,
   configKeys = null
 ) {
   let keys: { [x in keyof MongoDBConfigType]: string } = {

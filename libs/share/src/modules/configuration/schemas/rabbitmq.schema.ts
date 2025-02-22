@@ -1,10 +1,10 @@
 import * as Joi from "joi";
 import { HOST_SCHEMA } from "./common.schema";
 import { RabbitMQConfigType } from "../configs/rabbitmq.config";
-
+import { CONFIG_KEYS } from "@app/share/common/constants";
 export function rabbitmqConfigSchema(
   required = false,
-  configPrefix = "RABBITMQ",
+  configPrefix = CONFIG_KEYS.RABBITMQ,
   configKeys = null
 ) {
   let keys: { [x in keyof RabbitMQConfigType]: string } = {

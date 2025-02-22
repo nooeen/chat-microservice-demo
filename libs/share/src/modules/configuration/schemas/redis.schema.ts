@@ -1,10 +1,11 @@
 import * as Joi from "joi";
 import { HOST_SCHEMA, PORT_SCHEMA } from "./common.schema";
 import { RedisConfigType } from "../configs/redis.config";
+import { CONFIG_KEYS } from "@app/share/common/constants";
 
 export function redisConfigSchema(
   required = false,
-  configPrefix = "REDIS",
+  configPrefix = CONFIG_KEYS.REDIS,
   configKeys = null
 ) {
   let keys: { [x in keyof RedisConfigType]: string } = {

@@ -1,11 +1,13 @@
+import { CONFIG_KEYS } from "@app/share/common/constants";
+
 export type MeilisearchConfigType = {
   url: string;
   key: string;
 };
 
 export const buildMeilisearchConfig = (
-  configKeymap = "meilisearch",
-  configPrefix = "MEILISEARCH",
+  configKeymap = CONFIG_KEYS.MEILISEARCH,
+  configPrefix = CONFIG_KEYS.MEILISEARCH,
   configKeys = null
 ) => {
   let keys: { [x in keyof MeilisearchConfigType]: string } = {

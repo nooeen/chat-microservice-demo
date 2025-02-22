@@ -1,5 +1,5 @@
-import { InfinityPaginationResultType } from "../serializers/infinity-pagination-result.serializer";
-import { PaginationOptionsType } from "../validators/pagination.validator";
+import { InfinityResponse } from "../common/dto/infinity-response.dto";
+import { PageOptionsType } from "../common/dto/page-options.dto";
 
 export const getPaginationProp = (page: number, limit: number) => {
   const offset = (page - 1) * limit;
@@ -16,8 +16,8 @@ export const getTotalPaginatedPages = (limit: number, totalItems: number) => {
 
 export const infinityPagination = <T>(
   data: T[],
-  options: PaginationOptionsType
-): InfinityPaginationResultType<T> => {
+  options: PageOptionsType
+): InfinityResponse<T> => {
   return {
     data,
     hasNextPage: data.length === options.limit,

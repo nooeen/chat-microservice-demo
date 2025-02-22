@@ -1,3 +1,5 @@
+import { CONFIG_KEYS } from "@app/share/common/constants";
+
 export type RedisConfigType = {
   host: string;
   port: number;
@@ -8,8 +10,8 @@ export type RedisConfigType = {
 };
 
 export const buildRedisConfig = (
-  configKeymap = "redis",
-  configPrefix = "REDIS",
+  configKeymap = CONFIG_KEYS.REDIS,
+  configPrefix = CONFIG_KEYS.REDIS,
   configKeys = null
 ) => {
   let keys: { [x in keyof RedisConfigType]: string } = {

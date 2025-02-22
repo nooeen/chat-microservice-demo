@@ -1,10 +1,11 @@
 import * as Joi from "joi";
 import { HOST_SCHEMA } from "./common.schema";
 import { MeilisearchConfigType } from "../configs/meilisearch.config";
+import { CONFIG_KEYS } from "@app/share/common/constants";
 
 export function meilisearchConfigSchema(
   required = false,
-  configPrefix = "MEILISEARCH",
+  configPrefix = CONFIG_KEYS.MEILISEARCH,
   configKeys = null
 ) {
   let keys: { [x in keyof MeilisearchConfigType]: string } = {

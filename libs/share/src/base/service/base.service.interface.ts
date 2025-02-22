@@ -1,6 +1,6 @@
+import { PageResponse } from "../../common/dto/page-response.dto";
+import { QueryOptions } from "../../common/ts/query-options";
 import { HydratedDocument, UpdateWriteOpResult } from "mongoose";
-import { QueryOptions } from "../validators/query-options.validator";
-import { PaginatedResultType } from "../serializers/paginated-response.serializer";
 
 export interface Write<T> {
   create(item: Partial<T> | T | any): Promise<T>;
@@ -15,7 +15,7 @@ export interface Read<T> {
   findOne(query: QueryOptions): Promise<HydratedDocument<T>>;
   findById(id: string): Promise<HydratedDocument<T>>;
   find(query: QueryOptions);
-  findWithPagination(query: QueryOptions): Promise<PaginatedResultType<HydratedDocument<T>>>;
+  findWithPagination(query: QueryOptions): Promise<PageResponse<HydratedDocument<T>>>;
   count(query: QueryOptions): Promise<number>;
 }
 export interface BaseServiceInterface<T> extends Write<T>, Read<T> {

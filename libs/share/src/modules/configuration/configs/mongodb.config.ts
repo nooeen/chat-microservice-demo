@@ -1,3 +1,4 @@
+import { CONFIG_KEYS } from "@app/share/common/constants";
 import { RedisConfigType, buildRedisConfig } from "./redis.config";
 
 export type MongoDBConfigType = {
@@ -7,8 +8,8 @@ export type MongoDBConfigType = {
 };
 
 export const buildMongoDBConfig = (
-  configKeymap = "mongodb",
-  configPrefix = "MONGODB",
+  configKeymap = CONFIG_KEYS.MONGODB,
+  configPrefix = CONFIG_KEYS.MONGODB,
   configKeys = null
 ) => {
   let keys: { [x in keyof MongoDBConfigType]: string } = {

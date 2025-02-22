@@ -1,9 +1,10 @@
 import * as Joi from "joi";
 import { JWTConfigType } from "../configs/jwt.config";
+import { CONFIG_KEYS } from "@app/share/common/constants";
 
 export function jwtConfigSchema(
   required = false,
-  configPrefix = "JWT",
+  configPrefix = CONFIG_KEYS.JWT,
   configKeys = null
 ) {
   let keys: { [x in keyof JWTConfigType]: string } = {
