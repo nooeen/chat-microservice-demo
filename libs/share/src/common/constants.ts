@@ -7,6 +7,24 @@ export const CONFIG_KEYS = {
   QUEUE: "QUEUE",
 };
 
+export const MICROSERVICE_KEYS = {
+  AUTH: "AUTH_SERVICE",
+  CHAT: "CHAT_SERVICE",
+};
+
+export const API_PATHS = {
+  REGISTER: "register",
+  LOGIN: "login",
+  VALIDATE_TOKEN: "validate-token",
+};
+
+export const AUTH_COMMANDS = {
+  REGISTER: "register",
+  VALIDATE_USER: "validate-user",
+  GENERATE_TOKEN: "generate-token",
+  VALIDATE_TOKEN: "validate-token",
+};
+
 export const CACHE_1S = 1; //1
 export const CACHE_2S = 2; //2
 export const CACHE_5M = 300; //5*60

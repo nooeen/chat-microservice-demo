@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtStrategy } from '../../api/src/guards/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_KEYS, ShareModule } from '@app/share';
 import { UsersModule } from '@app/users';
+import { LocalStrategy } from '../../api/src/guards/local.strategy';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UsersModule } from '@app/users';
       useFactory: async (configService: ConfigService) => {
         const jwtConfig = configService.get(CONFIG_KEYS.JWT);
         return {
+          global: true,
           secret: jwtConfig.secret,
           signOptions: { expiresIn: jwtConfig.expiresIn },
         };
@@ -23,7 +25,7 @@ import { UsersModule } from '@app/users';
     UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, LocalStrategy],
   exports: [AuthService],
 })
 export class AuthModule {} 

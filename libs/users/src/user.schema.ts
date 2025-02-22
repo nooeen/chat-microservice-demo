@@ -27,7 +27,6 @@ export class UserModel extends BaseSchema {
   @Prop({
     type: String,
     required: true,
-    index: true,
   })
   public password: string;
 }
