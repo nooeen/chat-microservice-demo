@@ -1,0 +1,41 @@
+name: micro-chat-services
+services:
+  redis:
+    container_name: micro-chat-redis
+    image: bitnami/redis:latest
+    restart: always
+    environment:
+      - REDIS_PASSWORD=example
+    ports:
+      - '6390:6379'
+    volumes: 
+      - redis:/bitnami/redis/data
+
+  mongodb:
+    container_name: micro-chat-mongodb
+    image: mongo
+    ports:
+      - '27030:27017'
+    environment:
+      - MONGO_INITDB_DATABASE=microchat
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+
+  rabbitmq:
+    container_name: micro-chat-rabbitmq
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  redis:
+  mongodb_data:
+  mongodb_config:
+  rabbitmq_data:

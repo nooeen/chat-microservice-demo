@@ -1,6 +1,6 @@
 import * as Joi from "joi";
 import { HOST_SCHEMA } from "./common.schema";
-import { MeilisearchConfigType } from "../meilisearch.config";
+import { MeilisearchConfigType } from "../configs/meilisearch.config";
 
 export function meilisearchConfigSchema(
   required = false,
