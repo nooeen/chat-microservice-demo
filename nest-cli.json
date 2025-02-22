@@ -37,13 +37,13 @@
         "tsConfigPath": "apps/chat/tsconfig.app.json"
       }
     },
-    "configuration": {
+    "share": {
       "type": "library",
-      "root": "libs/configuration",
+      "root": "libs/share",
       "entryFile": "index",
-      "sourceRoot": "libs/configuration/src",
+      "sourceRoot": "libs/share/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/configuration/tsconfig.lib.json"
+        "tsConfigPath": "libs/share/tsconfig.lib.json"
       }
     }
   }

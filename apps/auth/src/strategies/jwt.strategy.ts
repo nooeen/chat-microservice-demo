@@ -1,4 +1,4 @@
-import { CONFIG_KEYS } from '@app/configuration';
+import { CONFIG_KEYS } from '@app/share';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';

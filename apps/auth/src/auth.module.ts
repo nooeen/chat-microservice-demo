@@ -3,13 +3,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { ConfigurationModule } from '@app/configuration';
 import { ConfigService } from '@nestjs/config';
-import { CONFIG_KEYS } from '@app/configuration';
+import { CONFIG_KEYS, ShareModule, ConfigurationModule } from '@app/share';
 
 @Module({
   imports: [
-    ConfigurationModule,
+    ShareModule,
     JwtModule.registerAsync({
       imports: [ConfigurationModule],
       useFactory: async (configService: ConfigService) => {
