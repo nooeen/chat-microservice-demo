@@ -16,6 +16,7 @@ export class ChatController {
 
   @MessagePattern({ cmd: CHAT_COMMANDS.GET_CONVERSATION })
   async getConversation(data: GetConversationRequestDto): Promise<GetConversationResponseDto> {
+    console.log('data', data);
     return this.chatService.getConversation(data);
   }
 

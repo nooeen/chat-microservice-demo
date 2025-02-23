@@ -16,6 +16,8 @@ export const API_PATHS = {
   REGISTER: "register",
   LOGIN: "login",
   VALIDATE: "validate",
+  GET_CONVERSATION: "conversation",
+  GET_RECENT_CONVERSATIONS: "recent-conversations",
 };
 
 export const AUTH_COMMANDS = {

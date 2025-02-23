@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiService } from './api.service';
 import { API_PATHS } from '@app/share';
 import { RegisterBodyDto } from './dto/register-body.dto';
@@ -23,5 +23,17 @@ export class ApiController {
   @Get(API_PATHS.VALIDATE)
   validateToken(@Request() req) {
     return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(API_PATHS.GET_RECENT_CONVERSATIONS)
+  getRecentConversations(@Request() req) {
+    return this.apiService.getRecentConversations(req.user.username);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(API_PATHS.GET_CONVERSATION)
+  getConversation(@Request() req, @Query('username') username: string) {
+    return this.apiService.getConversation(req.user.username, username);
   }
 }
