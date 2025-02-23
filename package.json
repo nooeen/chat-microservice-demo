@@ -36,6 +36,9 @@
     "@nestjs/mongoose": "^11.0.1",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-socket.io": "^11.0.10",
+    "@nestjs/websockets": "^11.0.10",
+    "@socket.io/redis-adapter": "^8.3.0",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.5",
     "class-transformer": "^0.5.1",
@@ -50,8 +53,10 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.2",
+    "socket.io": "^4.8.1",
     "speedgoose": "^2.1.0"
   },
   "devDependencies": {
@@ -100,6 +105,8 @@
     ],
     "moduleNameMapper": {
       "^@app/configuration(|/.*)$": "<rootDir>/libs/configuration/src/$1",
+      "^@app/conversations(|/.*)$": "<rootDir>/libs/conversations/src/$1",
+      "^@app/messages(|/.*)$": "<rootDir>/libs/messages/src/$1",
       "^@app/microservice(|/.*)$": "<rootDir>/libs/microservice/src/$1",
       "^@app/share(|/.*)$": "<rootDir>/libs/share/src/$1",
       "^@app/users(|/.*)$": "<rootDir>/libs/users/src/$1"

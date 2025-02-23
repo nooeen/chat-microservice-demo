@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
-import { MICROSERVICE_KEYS, ShareModule } from '@app/share';
+import { MICROSERVICE_KEYS, RedisModule, ShareModule } from '@app/share';
 import { Transport } from '@nestjs/microservices';
 import { ClientsModule } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMQConfigType } from '@app/share/modules/configuration/configs/rabbitmq.config';
 import { CONFIG_KEYS } from '@app/share';
-import { LocalStrategy } from './guards/local.strategy';
-import { JwtStrategy } from './guards/jwt.strategy';
+import { LocalStrategy } from '../../../libs/share/src/guards/local.strategy';
+import { JwtStrategy } from '../../../libs/share/src/guards/jwt.strategy';
+import { SocketGateway } from './socket/socket.gateway';
 
 @Module({
-  imports: [ShareModule, ClientsModule.registerAsync([
+  imports: [ShareModule, RedisModule, ClientsModule.registerAsync([
     {
       name: MICROSERVICE_KEYS.AUTH,
       inject: [ConfigService],
@@ -29,6 +30,6 @@ import { JwtStrategy } from './guards/jwt.strategy';
   ]),
   ],
   controllers: [ApiController],
-  providers: [ApiService, LocalStrategy, JwtStrategy],
+  providers: [ApiService, LocalStrategy, JwtStrategy, SocketGateway],
 })
 export class ApiModule {}

@@ -14,7 +14,7 @@ import mongoose, { Types } from "mongoose";
   },
   versionKey: false,
 })
-export class UserModel extends BaseSchema {
+export class ConversationModel extends BaseSchema {
   _id: Types.ObjectId;
 
   @Prop({
@@ -22,22 +22,23 @@ export class UserModel extends BaseSchema {
     required: true,
     index: true,
   })
-  public username: string;
+  public user_id_1: string;
 
   @Prop({
     type: String,
     required: true,
+    index: true,
   })
-  public password: string;
+  public user_id_2: string;
 }
 
-export type UserDocument = UserModel & mongoose.Document;
-const schema = SchemaFactory.createForClass(UserModel);
+export type ConversationDocument = ConversationModel & mongoose.Document;
+const schema = SchemaFactory.createForClass(ConversationModel);
 
-schema.pre("save", function (this: UserModel, next) {
+schema.pre("save", function (this: ConversationModel, next) {
   this.updated_at = Date.now();
   next();
 });
-schema.loadClass(UserModel);
+schema.loadClass(ConversationModel);
 
-export const UserSchema = schema;
+export const ConversationSchema = schema;

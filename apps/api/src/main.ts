@@ -4,17 +4,25 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { RedisIoAdapter } from './socket/redis-io.adapter';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(ApiModule, {
     cors: true,
   });
 
+  const configService = app.get<ConfigService>(ConfigService);
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     })
   );
+
+  const redisIoAdapter = new RedisIoAdapter(configService);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
 
   app.enableCors({
     origin: true,
@@ -28,8 +36,8 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(compression());
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log(`---------- API_PORT: ${process.env.PORT ?? 3000} ----------`);
+  await app.listen(process.env.API_PORT ?? 3000);
+  console.log(`---------- API_PORT: ${process.env.API_PORT ?? 3000} ----------`);
 }
 
 bootstrap();

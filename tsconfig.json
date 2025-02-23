@@ -18,6 +18,18 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@app/conversations": [
+        "libs/conversations/src"
+      ],
+      "@app/conversations/*": [
+        "libs/conversations/src/*"
+      ],
+      "@app/messages": [
+        "libs/messages/src"
+      ],
+      "@app/messages/*": [
+        "libs/messages/src/*"
+      ],
       "@app/share": [
         "libs/share/src"
       ],

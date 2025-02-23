@@ -37,6 +37,24 @@
         "tsConfigPath": "apps/chat/tsconfig.app.json"
       }
     },
+    "conversations": {
+      "type": "library",
+      "root": "libs/conversations",
+      "entryFile": "index",
+      "sourceRoot": "libs/conversations/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/conversations/tsconfig.lib.json"
+      }
+    },
+    "messages": {
+      "type": "library",
+      "root": "libs/messages",
+      "entryFile": "index",
+      "sourceRoot": "libs/messages/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/messages/tsconfig.lib.json"
+      }
+    },
     "share": {
       "type": "library",
       "root": "libs/share",

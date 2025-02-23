@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtStrategy } from '../../api/src/guards/jwt.strategy';
+import { JwtStrategy } from '../../../libs/share/src/guards/jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 import { CONFIG_KEYS, ShareModule } from '@app/share';
 import { UsersModule } from '@app/users';
-import { LocalStrategy } from '../../api/src/guards/local.strategy';
+import { LocalStrategy } from '../../../libs/share/src/guards/local.strategy';
 
 @Module({
   imports: [

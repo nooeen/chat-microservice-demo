@@ -28,8 +28,8 @@ import { rabbitmqConfigSchema } from "./schemas/rabbitmq.schema";
         NODE_ENV: Joi.string()
           .valid("development", "production", "test", "provision", "staging")
           .default("development"),
-        WEB_PORT: Joi.number().default(3000),
-        API_PORT: Joi.number().default(3004),
+        API_PORT: Joi.number().default(3000),
+        CHAT_PORT: Joi.number().default(3001),
         ...redisConfigSchema(true), // REDIS CACHE
         ...mongodbConfigSchema(true), // MONGODB & DB CACHE
         ...jwtConfigSchema(true), // JWT
