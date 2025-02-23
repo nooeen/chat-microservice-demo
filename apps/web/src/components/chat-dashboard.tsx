@@ -10,15 +10,42 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AuthModals } from "./auth-modals"
+import { apiClient } from "@/lib/api-client"
+
+interface Conversation {
+  conversation_id: string;
+  last_message: string;
+  last_sender: string;
+}
 
 export default function ChatDashboard() {
   const [currentTab, setCurrentTab] = useState("chats")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const jwt = localStorage.getItem('jwt')
     setIsAuthenticated(!!jwt)
   }, [])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchRecentConversations()
+    }
+  }, [isAuthenticated])
+
+  const fetchRecentConversations = async () => {
+    try {
+      setLoading(true)
+      const response = await apiClient.getRecentConversations()
+      setConversations(response.conversations)
+    } catch (error) {
+      console.error('Failed to fetch conversations:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -54,29 +81,34 @@ export default function ChatDashboard() {
 
             <TabsContent value="chats" className="flex-1 m-0">
               <ScrollArea className="h-full">
-                {chats.map((chat) => (
-                  <button
-                    key={chat.id}
-                    className="flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={chat.avatar} />
-                      <AvatarFallback>{chat.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col items-start gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{chat.name}</span>
-                        <span className="text-xs text-muted-foreground">{chat.time}</span>
+                {loading ? (
+                  <div className="flex items-center justify-center p-4">
+                    <p className="text-sm text-muted-foreground">Loading conversations...</p>
+                  </div>
+                ) : conversations.length === 0 ? (
+                  <div className="flex items-center justify-center p-4">
+                    <p className="text-sm text-muted-foreground">No conversations yet</p>
+                  </div>
+                ) : (
+                  conversations.map((conversation) => (
+                    <button
+                      key={conversation.conversation_id}
+                      className="flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>{conversation.last_sender[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{conversation.last_sender}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground line-clamp-1">
+                          {conversation.last_message}
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground line-clamp-1">{chat.lastMessage}</span>
-                    </div>
-                    {chat.unread > 0 && (
-                      <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
-                        {chat.unread}
-                      </span>
-                    )}
-                  </button>
-                ))}
+                    </button>
+                  ))
+                )}
               </ScrollArea>
             </TabsContent>
 

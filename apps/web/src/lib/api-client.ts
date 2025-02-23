@@ -11,6 +11,16 @@ interface RegisterResponse {
   message: string;
 }
 
+interface Conversation {
+  conversation_id: string;
+  last_message: string;
+  last_sender: string;
+}
+
+interface GetRecentConversationsResponse {
+  conversations: Conversation[];
+}
+
 const hashPassword = async (password: string): Promise<string> => {
   const msgBuffer = new TextEncoder().encode(password);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -54,6 +64,29 @@ export const apiClient = {
     
     if (!response.ok) {
       throw new Error(data.message || 'Registration failed');
+    }
+
+    return data;
+  },
+
+  getRecentConversations: async (): Promise<GetRecentConversationsResponse> => {
+    const jwt = localStorage.getItem('jwt');
+    if (!jwt) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(`${API_URL}/recent-conversations`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch conversations');
     }
 
     return data;
