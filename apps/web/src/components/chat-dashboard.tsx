@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MessageCircle, Users } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,17 +13,29 @@ import { AuthModals } from "./auth-modals"
 
 export default function ChatDashboard() {
   const [currentTab, setCurrentTab] = useState("chats")
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const jwt = localStorage.getItem('jwt')
+    setIsAuthenticated(!!jwt)
+  }, [])
 
   return (
     <div className="flex flex-col h-screen">
       {/* Header */}
       <header className="border-b px-6 py-3 flex items-center justify-between bg-background">
         <h1 className="text-xl font-semibold">Chat App</h1>
-        <AuthModals />
+        <AuthModals onLogin={() => setIsAuthenticated(true)} />
       </header>
 
       {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className={`flex flex-1 overflow-hidden relative ${!isAuthenticated ? 'pointer-events-none' : ''}`}>
+        {!isAuthenticated && (
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <p className="text-lg text-muted-foreground">Please login to access the chat</p>
+          </div>
+        )}
+        
         {/* Sidebar */}
         <Card className="w-80 border-r rounded-none border-l-0 border-t-0 border-b-0">
           <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full h-full flex flex-col">

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AlertCircle } from "lucide-react"
 
 
@@ -19,11 +19,23 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export function AuthModals() {
+import { apiClient } from "@/lib/api-client"
+
+interface AuthModalsProps {
+  onLogin?: () => void;
+}
+
+export function AuthModals({ onLogin }: AuthModalsProps) {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isRegisterOpen, setIsRegisterOpen] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    const jwt = localStorage.getItem('jwt')
+    setIsAuthenticated(!!jwt)
+  }, [])
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -34,17 +46,23 @@ export function AuthModals() {
     const username = formData.get("username") as string
     const password = formData.get("password") as string
 
-    // Add your login logic here
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      console.log("Login:", { username, password })
+      const response = await apiClient.login(username, password)
+      localStorage.setItem('jwt', response.access_token)
+      setIsAuthenticated(true)
+      onLogin?.()
       setIsLoginOpen(false)
     } catch (err) {
-      setError("Invalid username or password")
+      setError(err instanceof Error ? err.message : "Invalid username or password")
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwt')
+    setIsAuthenticated(false)
+    window.location.reload() // Refresh to reset the app state
   }
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,17 +81,27 @@ export function AuthModals() {
       return
     }
 
-    // Add your register logic here
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      console.log("Register:", { username, password })
+      await apiClient.register(username, password)
+      // Auto login after successful registration
+      const loginResponse = await apiClient.login(username, password)
+      localStorage.setItem('jwt', loginResponse.access_token)
+      setIsAuthenticated(true)
+      onLogin?.()
       setIsRegisterOpen(false)
     } catch (err) {
-      setError("Failed to create account")
+      setError(err instanceof Error ? err.message : "Failed to create account")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (isAuthenticated) {
+    return (
+      <Button variant="outline" onClick={handleLogout}>
+        Logout
+      </Button>
+    )
   }
 
   return (
