@@ -84,7 +84,8 @@ export class ChatService {
           conversation_id: conversation._id.toString(),
         },
         sort: {
-          created_at: -1,
+          // created_at: -1,
+          created_at: 1 // Because pagination isn't implemented yet
         },
       });
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { MessageCircle, Users } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -49,6 +49,9 @@ export default function ChatDashboard() {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [currentUsername, setCurrentUsername] = useState<string>("")
+
+  // Add new ref for message container
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const jwt = localStorage.getItem('jwt')
@@ -108,6 +111,22 @@ export default function ChatDashboard() {
     }
   }, []);
 
+  // Update the scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  // Modify the useEffect for scrolling
+  useEffect(() => {
+    // Only scroll if the new message is from the current user or it's the initial load
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage?.sender === currentUsername || messages.length === 0) {
+      scrollToBottom()
+    }
+  }, [messages, currentUsername])
+
   const fetchRecentConversations = async () => {
     try {
       setLoading(true)
@@ -153,10 +172,10 @@ export default function ChatDashboard() {
       }))
       
       // Optimistically add message to UI
-      setMessages(prev => [...prev, {
-        sender: currentUsername,
-        content: newMessage
-      }])
+      // setMessages(prev => [...prev, {
+      //   sender: currentUsername,
+      //   content: newMessage
+      // }])
       
       setNewMessage("")
     }
@@ -274,7 +293,7 @@ export default function ChatDashboard() {
         </Card>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* Chat Header */}
           {selectedUser && (
             <div className="flex items-center gap-4 border-b p-4 bg-background">
@@ -289,43 +308,51 @@ export default function ChatDashboard() {
           )}
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`flex items-end gap-2 ${
-                    message.sender === currentUsername ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {message.sender !== currentUsername && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{message.sender[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  )}
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full">
+              <div className="p-4 space-y-4">
+                {messages.length === 0 && selectedUser && (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <p>No messages yet. Start a conversation!</p>
+                  </div>
+                )}
+                {messages.map((message, index) => (
                   <div
-                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                      message.sender === currentUsername
-                        ? "bg-primary text-primary-foreground rounded-tr-none"
-                        : "bg-muted rounded-tl-none"
+                    key={index}
+                    className={`flex items-end gap-2 ${
+                      message.sender === currentUsername ? "justify-end" : "justify-start"
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
+                    {message.sender !== currentUsername && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>{message.sender[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div
+                      className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                        message.sender === currentUsername
+                          ? "bg-primary text-primary-foreground rounded-tr-none"
+                          : "bg-muted rounded-tl-none"
+                      }`}
+                    >
+                      <p className="text-sm">{message.content}</p>
+                    </div>
+                    {message.sender === currentUsername && (
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>{currentUsername[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    {message.timestamp && (
+                      <span className="text-[10px] text-muted-foreground self-end">
+                        {message.timestamp}
+                      </span>
+                    )}
                   </div>
-                  {message.sender === currentUsername && (
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{currentUsername[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  )}
-                  {message.timestamp && (
-                    <span className="text-[10px] text-muted-foreground self-end">
-                      {message.timestamp}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                ))}
+                <div ref={messagesEndRef} /> {/* Scroll anchor */}
+              </div>
+            </ScrollArea>
+          </div>
 
           {/* Input */}
           {selectedUser && (

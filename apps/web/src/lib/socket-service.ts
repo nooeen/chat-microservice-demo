@@ -6,8 +6,8 @@ class SocketService {
   connect(token: string) {
     if (!this.socket) {
       this.socket = io(import.meta.env.VITE_API_URL, {
-        extraHeaders: {
-          Authorization: `Bearer ${token}`,
+        auth: {
+          token: `Bearer ${token}`
         },
         transports: ['websocket'],
         upgrade: false,

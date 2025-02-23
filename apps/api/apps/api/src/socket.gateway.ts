@@ -43,7 +43,7 @@ export class SocketGateway
 
   // On User Connect
   async handleConnection(client: Socket) {
-    const bearerToken = client.handshake.headers.authorization;
+    const bearerToken = client.handshake.auth.token;
 
     try {
       const validateToken = await lastValueFrom(
