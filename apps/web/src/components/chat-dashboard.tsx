@@ -18,11 +18,17 @@ interface Conversation {
   last_sender: string;
 }
 
+interface ActiveUser {
+  username: string;
+}
+
 export default function ChatDashboard() {
   const [currentTab, setCurrentTab] = useState("chats")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(false)
+  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
+  const [loadingActiveUsers, setLoadingActiveUsers] = useState(false)
 
   useEffect(() => {
     const jwt = localStorage.getItem('jwt')
@@ -31,9 +37,20 @@ export default function ChatDashboard() {
 
   useEffect(() => {
     if (isAuthenticated) {
+      // Initial fetch
       fetchRecentConversations()
+      fetchActiveUsers()
+
+      // Set up polling for active users
+      const pollInterval = setInterval(() => {
+        fetchActiveUsers()
+      }, 10000) // 10 seconds
+
+      // Cleanup function to clear interval when component unmounts
+      // or when isAuthenticated changes
+      return () => clearInterval(pollInterval)
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated]) // Only re-run effect if isAuthenticated changes
 
   const fetchRecentConversations = async () => {
     try {
@@ -44,6 +61,18 @@ export default function ChatDashboard() {
       console.error('Failed to fetch conversations:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchActiveUsers = async () => {
+    try {
+      setLoadingActiveUsers(true)
+      const response = await apiClient.getActiveUsers()
+      setActiveUsers(response.usernames.map(username => ({ username })))
+    } catch (error) {
+      console.error('Failed to fetch active users:', error)
+    } finally {
+      setLoadingActiveUsers(false)
     }
   }
 
@@ -114,24 +143,33 @@ export default function ChatDashboard() {
 
             <TabsContent value="active" className="flex-1 m-0">
               <ScrollArea className="h-full">
-                {activeUsers.map((user) => (
-                  <button
-                    key={user.id}
-                    className="flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="relative">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.avatar} />
-                        <AvatarFallback>{user.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-sm font-medium">{user.name}</span>
-                      <span className="text-xs text-muted-foreground">{user.status}</span>
-                    </div>
-                  </button>
-                ))}
+                {loadingActiveUsers ? (
+                  <div className="flex items-center justify-center p-4">
+                    <p className="text-sm text-muted-foreground">Loading active users...</p>
+                  </div>
+                ) : !activeUsers || activeUsers.length === 0 ? (
+                  <div className="flex items-center justify-center p-4">
+                    <p className="text-sm text-muted-foreground">No active users</p>
+                  </div>
+                ) : (
+                  activeUsers.map((user) => (
+                    <button
+                      key={user.username}
+                      className="flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="relative">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background bg-green-500" />
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-medium">{user.username}</span>
+                        <span className="text-xs text-muted-foreground">Online</span>
+                      </div>
+                    </button>
+                  ))
+                )}
               </ScrollArea>
             </TabsContent>
           </Tabs>
@@ -189,62 +227,6 @@ export default function ChatDashboard() {
     </div>
   )
 }
-
-const chats = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    avatar: "/avatars/01.png",
-    lastMessage: "I'll send you the files shortly",
-    time: "2m ago",
-    unread: 2,
-  },
-  {
-    id: 2,
-    name: "Michael Kim",
-    avatar: "/avatars/02.png",
-    lastMessage: "The meeting is scheduled for tomorrow at 10 AM",
-    time: "1h ago",
-    unread: 0,
-  },
-  {
-    id: 3,
-    name: "Emily Davis",
-    avatar: "/avatars/03.png",
-    lastMessage: "Thanks for your help!",
-    time: "2h ago",
-    unread: 0,
-  },
-  {
-    id: 4,
-    name: "Alex Thompson",
-    avatar: "/avatars/04.png",
-    lastMessage: "Let's discuss this in person",
-    time: "1d ago",
-    unread: 0,
-  },
-]
-
-const activeUsers = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    avatar: "/avatars/01.png",
-    status: "Online",
-  },
-  {
-    id: 2,
-    name: "Michael Kim",
-    avatar: "/avatars/02.png",
-    status: "Online",
-  },
-  {
-    id: 3,
-    name: "Emily Davis",
-    avatar: "/avatars/03.png",
-    status: "Online",
-  },
-]
 
 const messages = [
   {

@@ -18,6 +18,7 @@ export const API_PATHS = {
   VALIDATE: "validate",
   GET_CONVERSATION: "conversation",
   GET_RECENT_CONVERSATIONS: "recent-conversations",
+  ACTIVE_USERS: "active-users",
 };
 
 export const AUTH_COMMANDS = {
@@ -31,6 +32,7 @@ export const CHAT_COMMANDS = {
   SAVE_MESSAGE: "save-message",
   GET_CONVERSATION: "get-conversation",
   GET_RECENT_CONVERSATIONS: "get-recent-conversations",
+  GET_ACTIVE_USERS: "get-active-users",
 };
 
 export const REDIS_HASH_KEYS = {

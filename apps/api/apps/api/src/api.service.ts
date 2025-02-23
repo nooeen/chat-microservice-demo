@@ -6,6 +6,7 @@ import { GetRecentConversationRequestDto } from 'apps/chat/src/dto/get-recent-co
 import { GetRecentConversationResponseDto } from 'apps/chat/src/dto/get-recent-conversation.dto';
 import { GetConversationRequestDto } from 'apps/chat/src/dto/get-conversation.dto';
 import { GetConversationResponseDto } from 'apps/chat/src/dto/get-conversation.dto';
+import { GetActiveUsersResponseDto, GetActiveUsersRequestDto } from 'apps/chat/src/dto/get-active-users.dto';
 @Injectable()
 export class ApiService {
   constructor(
@@ -37,4 +38,11 @@ export class ApiService {
     }
   }
 
+  getActiveUsers(username: string) {
+    try {
+      return this.chatClient.send<GetActiveUsersResponseDto, GetActiveUsersRequestDto>({ cmd: CHAT_COMMANDS.GET_ACTIVE_USERS }, { username });
+    } catch (error) {
+      throw new error;
+    }
+  }
 }

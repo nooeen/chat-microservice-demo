@@ -5,9 +5,11 @@ import { SaveMessageRequestDto, SaveMessageResponseDto } from './dto/save-messag
 import { GetConversationRequestDto, GetConversationResponseDto } from './dto/get-conversation.dto';
 import { GetRecentConversationRequestDto, GetRecentConversationResponseDto } from './dto/get-recent-conversation.dto';
 import { CHAT_COMMANDS } from '@app/share';
+import { GetActiveUsersResponseDto } from './dto/get-active-users.dto';
+import { GetActiveUsersRequestDto } from './dto/get-active-users.dto';
 @Controller()
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService) { }
 
   @MessagePattern({ cmd: CHAT_COMMANDS.SAVE_MESSAGE })
   async saveMessage(data: SaveMessageRequestDto): Promise<SaveMessageResponseDto> {
@@ -23,5 +25,10 @@ export class ChatController {
   @MessagePattern({ cmd: CHAT_COMMANDS.GET_RECENT_CONVERSATIONS })
   async getRecentConversations(data: GetRecentConversationRequestDto): Promise<GetRecentConversationResponseDto> {
     return this.chatService.getRecentConversations(data);
+  }
+
+  @MessagePattern({ cmd: CHAT_COMMANDS.GET_ACTIVE_USERS })
+  async getActiveUsers(data: GetActiveUsersRequestDto): Promise<GetActiveUsersResponseDto> {
+    return this.chatService.getActiveUsers(data);
   }
 } 

@@ -7,11 +7,15 @@ import { GetRecentConversationRequestDto } from './dto/get-recent-conversation.d
 import { GetRecentConversationResponseDto } from './dto/get-recent-conversation.dto';
 import { ConversationDocument, ConversationModel } from '@app/conversations/conversation.schema';
 import { ConversationsService } from '@app/conversations';
+import { RedisService } from '@app/share/modules/redis/redis.service';
+import { GetActiveUsersRequestDto, GetActiveUsersResponseDto } from './dto/get-active-users.dto';
+import { REDIS_HASH_KEYS } from '@app/share';
 @Injectable()
 export class ChatService {
   constructor(
     private readonly conversationsService: ConversationsService,
-    private readonly messagesService: MessagesService
+    private readonly messagesService: MessagesService,
+    private readonly redisService: RedisService
   ) { }
 
   async saveMessage({ sender, receiver, content }: SaveMessageRequestDto): Promise<SaveMessageResponseDto> {
@@ -132,6 +136,24 @@ export class ChatService {
 
       return {
         conversations,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async getActiveUsers({ username }: GetActiveUsersRequestDto): Promise<GetActiveUsersResponseDto> {
+    try {
+      const activeUsers = await this.redisService.hgetall(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING);
+
+      if (!activeUsers) {
+        return {
+          usernames: [],
+        };
+      }
+
+      return {
+        usernames: Object.keys(activeUsers).filter((user) => user !== username),
       };
     } catch (error) {
       return error;

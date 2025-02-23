@@ -21,6 +21,14 @@ interface GetRecentConversationsResponse {
   conversations: Conversation[];
 }
 
+interface ActiveUser {
+  username: string;
+}
+
+interface GetActiveUsersResponse {
+  usernames: string[];
+}
+
 const hashPassword = async (password: string): Promise<string> => {
   const msgBuffer = new TextEncoder().encode(password);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -87,6 +95,29 @@ export const apiClient = {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch conversations');
+    }
+
+    return data;
+  },
+
+  getActiveUsers: async (): Promise<GetActiveUsersResponse> => {
+    const jwt = localStorage.getItem('jwt');
+    if (!jwt) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(`${API_URL}/active-users`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch active users');
     }
 
     return data;

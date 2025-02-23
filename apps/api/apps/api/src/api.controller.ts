@@ -36,4 +36,10 @@ export class ApiController {
   getConversation(@Request() req, @Query('username') username: string) {
     return this.apiService.getConversation(req.user.username, username);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(API_PATHS.ACTIVE_USERS)
+  getActiveUsers(@Request() req) {
+    return this.apiService.getActiveUsers(req.user.username);
+  }
 }
