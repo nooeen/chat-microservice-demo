@@ -1,9 +1,8 @@
-function App() {
+import ChatDashboard from "./components/chat-dashboard"
 
+function App() {
   return (
-    <>
-      <h1>Hello World</h1>
-    </>
+    <ChatDashboard />
   )
 }
 
