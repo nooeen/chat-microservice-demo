@@ -10,10 +10,11 @@ import {
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '@app/share/modules/redis/redis.service';
 import { MICROSERVICE_KEYS, REDIS_HASH_KEYS, AUTH_COMMANDS, CustomWsExceptionsFilter, SOCKET_EVENTS } from '@app/share';
-import { Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { Inject, UseFilters } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { MessageDto } from './dto/message.dto';
 
 interface SocketPayload {
   username?: string;
@@ -99,11 +100,11 @@ export class SocketGateway
   }
 
   @SubscribeMessage(SOCKET_EVENTS.ON_MESSAGE)
-  async handleMessage(client: Socket, message: any) {
+  async handleMessage(client: Socket, message: string) {
     try {
       const senderSocketId = client.id;
 
-      const messageObject = JSON.parse(message);
+      const messageObject = JSON.parse(message) as MessageDto;
 
       const receiver = messageObject['receiver'];
       const content = messageObject['content'];

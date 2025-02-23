@@ -22,14 +22,14 @@ export class ConversationModel extends BaseSchema {
     required: true,
     index: true,
   })
-  public user_id_1: string;
+  public username_1: string;
 
   @Prop({
     type: String,
     required: true,
     index: true,
   })
-  public user_id_2: string;
+  public username_2: string;
 }
 
 export type ConversationDocument = ConversationModel & mongoose.Document;

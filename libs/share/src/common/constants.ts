@@ -26,8 +26,9 @@ export const AUTH_COMMANDS = {
 };
 
 export const CHAT_COMMANDS = {
-  SEND_MESSAGE: "send-message",
-  GET_MESSAGES: "get-messages",
+  SAVE_MESSAGE: "save-message",
+  GET_CONVERSATION: "get-conversation",
+  GET_RECENT_CONVERSATIONS: "get-recent-conversations",
 };
 
 export const REDIS_HASH_KEYS = {

@@ -28,13 +28,13 @@ export class MessageModel extends BaseSchema {
     type: String,
     required: true,
   })
-  public sender_id: string;
+  public sender: string;
 
   @Prop({
     type: String,
     required: true,
   })
-  public message: string;
+  public content: string;
 }
 
 export type MessageDocument = MessageModel & mongoose.Document;
