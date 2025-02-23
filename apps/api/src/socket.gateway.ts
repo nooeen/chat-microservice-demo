@@ -99,6 +99,22 @@ export class SocketGateway
     client.emit(SOCKET_EVENTS.PING, 'pong');
   }
 
+  @SubscribeMessage(SOCKET_EVENTS.MESSAGE)
+  async handleMessage(client: Socket, message: any) {
+    const sender = message.sender;
+    const receiver = message.receiver;
+    const content = message.message;
+
+    const receiverSocketIds = await this.getSocketIds(receiver);
+    if (receiverSocketIds) {
+      this.server.to(receiverSocketIds).emit(SOCKET_EVENTS.MESSAGE, {
+        sender,
+        receiver,
+        content
+      });
+    }
+  }
+
   // Add socketId with username in Redis
   async addSocketId(username: string, socketId: string): Promise<void> {
     const socketIds = await this.getSocketIds(username);

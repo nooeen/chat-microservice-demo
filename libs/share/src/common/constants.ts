@@ -36,10 +36,10 @@ export const REDIS_HASH_KEYS = {
 } as const;
 
 export const SOCKET_EVENTS = {
-  CONNECTED_INSTANCE: 'connected_instance',
   PING: 'ping',
-  MESSAGE: 'message',
+  CONNECTED_INSTANCE: 'connected_instance',
   ONLINE_USERS: 'online_users',
+  MESSAGE: 'message',
 } as const;
 
 export const CACHE_1S = 1; //1
