@@ -10,6 +10,7 @@ import { CONFIG_KEYS } from '@app/share';
 import { LocalStrategy } from './guards/local.strategy';
 import { JwtStrategy } from './guards/jwt.strategy';
 import { SocketGateway } from './socket.gateway';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SocketGateway } from './socket.gateway';
         }),
       },
     ]),
+    ScheduleModule.forRoot(),
   ],
   controllers: [ApiController],
   providers: [ApiService, LocalStrategy, JwtStrategy, SocketGateway],

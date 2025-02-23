@@ -46,23 +46,11 @@ export class RedisService {
   }
 
   async hset(id, key, value, expire = -1) {
-    await this.redis.hset(id, key, JSON.stringify(value));
+    const result = await this.redis.hset(id, key, value);
     if (expire > 0) {
       await this.redis.expire(id, expire);
     }
-    return 1;
-
-    /*return new Promise((resolve, reject) => {
-		redis.HSET(id, key, JSON.stringify(value), function (err, reply) {
-			if (err) {
-				console.log(err);
-				return reject(err);
-			}
-			return resolve(reply);
-		});
-		redis.expire(id, expire)
-
-	});*/
+    return result;
   }
 
   async hget(id, key) {
@@ -218,7 +206,7 @@ export class RedisService {
       //push nhiều cái
       const data_ok = [];
       data.map((item) => {
-        data_ok.push(JSON.stringify(item));
+        data_ok.push(item);
       });
       await this.redis.lpush(`${id}`, ...data_ok);
       return 1;
@@ -226,7 +214,7 @@ export class RedisService {
       /* //push từng cái
       let async_data = [];
       data.map(item => {
-        async_data.push(redis.lpush(id, JSON.stringify(item)))
+        async_data.push(redis.lpush(id, item))
       })
       await Promise.all(async_data).then().catch(function (err) {console.error('ERROR lpushArrObj')});*/
     } catch (err) {

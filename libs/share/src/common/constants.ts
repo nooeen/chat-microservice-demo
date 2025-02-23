@@ -25,11 +25,22 @@ export const AUTH_COMMANDS = {
   VALIDATE_TOKEN: "validate-token",
 };
 
+export const CHAT_COMMANDS = {
+  SEND_MESSAGE: "send-message",
+  GET_MESSAGES: "get-messages",
+};
+
 export const REDIS_HASH_KEYS = {
   USER_SOCKETS_MAPPING: 'user_sockets_mapping',
   SOCKET_USER_MAPPING: 'socket_user_mapping',
 } as const;
 
+export const SOCKET_EVENTS = {
+  CONNECTED_INSTANCE: 'connected_instance',
+  PING: 'ping',
+  MESSAGE: 'message',
+  ONLINE_USERS: 'online_users',
+} as const;
 
 export const CACHE_1S = 1; //1
 export const CACHE_2S = 2; //2
