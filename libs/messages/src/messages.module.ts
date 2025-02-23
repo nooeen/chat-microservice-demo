@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessageModel, MessageSchema } from './message.schema';
-import { MessageRepository } from './messages.repository';
-import { MessageService } from './messages.service';
+import { MessagesRepository } from './messages.repository';
+import { MessagesService } from './messages.service';
 
 @Module({
   imports: [
@@ -23,7 +23,7 @@ import { MessageService } from './messages.service';
       },
     }]),
   ],
-  providers: [MessageRepository, MessageService],
-  exports: [MessageService],
+  providers: [MessagesRepository, MessagesService],
+  exports: [MessagesService],
 })
 export class MessagesModule { }

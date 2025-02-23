@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { BaseServiceAbstract } from "@app/share";
 import { MessageModel } from "./message.schema";
-import { MessageRepository } from "./messages.repository";
+import { MessagesRepository } from "./messages.repository";
 
 @Injectable()
-export class MessageService extends BaseServiceAbstract<MessageModel> {
-  constructor(private repo: MessageRepository) {
+export class MessagesService extends BaseServiceAbstract<MessageModel> {
+  constructor(private repo: MessagesRepository) {
     super(repo);
   }
 }

@@ -5,10 +5,10 @@ import { Model } from "mongoose";
 import { BaseRepositoryInterface } from "@app/share/base/database/base.repository.interface";
 import { ConversationModel } from "./conversation.schema";
 
-export type ConversationRepositoryInterface = BaseRepositoryInterface<ConversationModel>;
+export type ConversationsRepositoryInterface = BaseRepositoryInterface<ConversationModel>;
 
 @Injectable()
-export class ConversationRepository
+export class ConversationsRepository
   extends BaseRepositoryAbstract<ConversationModel>
   implements BaseRepositoryInterface<ConversationModel> {
   constructor(

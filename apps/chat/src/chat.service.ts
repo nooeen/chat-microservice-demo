@@ -1,25 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { SaveMessageDto } from './dto/save-message.dto';
-import { GetConversationRequestDto } from './dto/get-conversation-request.dto';
-import { ConversationRepository } from '@app/conversations/conversations.repository';
-import { MessageRepository } from '@app/messages/messages.repository';
-import { RpcException } from '@nestjs/microservices';
-import { GetConversationResponseDto } from './dto/get-conversation-response.dto';
-import { GetRecentConversationRequestDto } from './dto/get-recent-conversation-request.dto';
-import { GetRecentConversationResponseDto } from './dto/get-recent-conversation-response.dto';
+import { SaveMessageRequestDto, SaveMessageResponseDto } from './dto/save-message.dto';
+import { GetConversationRequestDto } from './dto/get-conversation.dto';
+import { MessagesService } from '@app/messages';
+import { GetConversationResponseDto } from './dto/get-conversation.dto';
+import { GetRecentConversationRequestDto } from './dto/get-recent-conversation.dto';
+import { GetRecentConversationResponseDto } from './dto/get-recent-conversation.dto';
 import { ConversationDocument, ConversationModel } from '@app/conversations/conversation.schema';
+import { ConversationsService } from '@app/conversations';
 @Injectable()
 export class ChatService {
   constructor(
-    private readonly conversationRepository: ConversationRepository,
-    private readonly messageRepository: MessageRepository
+    private readonly conversationsService: ConversationsService,
+    private readonly messagesService: MessagesService
   ) { }
 
-  async saveMessage({ sender, receiver, content }: SaveMessageDto) {
+  async saveMessage({ sender, receiver, content }: SaveMessageRequestDto): Promise<SaveMessageResponseDto> {
     try {
       let conversation: ConversationDocument | ConversationModel;
 
-      conversation = await this.conversationRepository.findOne({
+      conversation = await this.conversationsService.findOne({
         filter: {
           $or: [
             { $and: [{ username_1: sender }, { username_2: receiver }] },
@@ -29,32 +28,38 @@ export class ChatService {
       });
 
       if (!conversation) {
-        conversation = await this.conversationRepository.create({
+        conversation = await this.conversationsService.create({
           username_1: sender,
           username_2: receiver,
         });
       }
 
-      await this.conversationRepository.updateOne(
+      await this.conversationsService.updateOne(
         { _id: conversation._id },
         { $set: { updated_at: new Date() } }
       );
 
-      const newMessage = await this.messageRepository.create({
+      const newMessage = await this.messagesService.create({
         conversation_id: conversation._id.toString(),
         sender,
         content,
       });
 
-      return newMessage;
+      return {
+        status: 200,
+        message: newMessage,
+      };
     } catch (error) {
-      throw new RpcException('Failed to save message');
+      return {
+        status: 500,
+        message: error,
+      };
     }
   }
 
   async getConversation({ sender, receiver }: GetConversationRequestDto): Promise<GetConversationResponseDto> {
     try {
-      const conversation = await this.conversationRepository.findOne({
+      const conversation = await this.conversationsService.findOne({
         filter: {
           $or: [
             { $and: [{ username_1: sender }, { username_2: receiver }] },
@@ -63,7 +68,14 @@ export class ChatService {
         },
       });
 
-      const messages = await this.messageRepository.find({
+      if (!conversation) {
+        return {
+          conversation_id: null,
+          messages: [],
+        };
+      }
+
+      const messages = await this.messagesService.find({
         filter: {
           conversation_id: conversation._id.toString(),
         },
@@ -77,13 +89,13 @@ export class ChatService {
         messages,
       };
     } catch (error) {
-      throw new RpcException('Failed to get conversation');
+      return error;
     }
   }
 
   async getRecentConversations({ username }: GetRecentConversationRequestDto): Promise<GetRecentConversationResponseDto> {
     try {
-      const conversationsQuery = await this.conversationRepository.find({
+      const conversationsQuery = await this.conversationsService.find({
         filter: {
           $or: [
             { username_1: username },
@@ -95,8 +107,14 @@ export class ChatService {
         },
       });
 
+      if (!conversationsQuery) {
+        return {
+          conversations: [],
+        };
+      }
+
       const conversations = await Promise.all(conversationsQuery.map(async (conversation) => {
-        const lastMessage = await this.messageRepository.findOne({
+        const lastMessage = await this.messagesService.findOne({
           filter: {
             conversation_id: conversation._id.toString(),
           },
@@ -116,7 +134,7 @@ export class ChatService {
         conversations,
       };
     } catch (error) {
-      throw new RpcException('Failed to get recent conversations');
+      return error;
     }
   }
 }

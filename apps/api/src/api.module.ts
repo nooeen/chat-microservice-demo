@@ -31,6 +31,20 @@ import { ScheduleModule } from '@nestjs/schedule';
           },
         }),
       },
+      {
+        name: MICROSERVICE_KEYS.CHAT,
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).uri],
+            queue: configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).chatQueue,
+            queueOptions: {
+              durable: true,
+            },
+          },
+        }),
+      },
     ]),
     ScheduleModule.forRoot(),
   ],

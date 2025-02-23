@@ -9,12 +9,13 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '@app/share/modules/redis/redis.service';
-import { MICROSERVICE_KEYS, REDIS_HASH_KEYS, AUTH_COMMANDS, CustomWsExceptionsFilter, SOCKET_EVENTS } from '@app/share';
+import { MICROSERVICE_KEYS, REDIS_HASH_KEYS, AUTH_COMMANDS, CustomWsExceptionsFilter, SOCKET_EVENTS, CHAT_COMMANDS } from '@app/share';
 import { Inject, UseFilters } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { MessageDto } from './dto/message.dto';
+import { SaveMessageRequestDto, SaveMessageResponseDto } from 'apps/chat/src/dto/save-message.dto';
 
 interface SocketPayload {
   username?: string;
@@ -30,6 +31,7 @@ export class SocketGateway
 
   constructor(
     @Inject(MICROSERVICE_KEYS.AUTH) private readonly authClient: ClientProxy,
+    @Inject(MICROSERVICE_KEYS.CHAT) private readonly chatClient: ClientProxy,
     private readonly redisService: RedisService
   ) { }
 
@@ -44,7 +46,7 @@ export class SocketGateway
     const bearerToken = client.handshake.headers.authorization;
 
     try {
-      const validateToken = await firstValueFrom(
+      const validateToken = await lastValueFrom(
         this.authClient.send({ cmd: AUTH_COMMANDS.VALIDATE_TOKEN }, { token: bearerToken.split(' ')[1] })
       );
 
@@ -113,10 +115,20 @@ export class SocketGateway
       const receiverSocketIds = await this.getSocketIds(receiver);
 
       if (receiverSocketIds) {
-        this.server.to(receiverSocketIds).emit(SOCKET_EVENTS.EMIT_MESSAGE, {
+        const saveMessageResponse = await lastValueFrom(this.chatClient.send<SaveMessageResponseDto, SaveMessageRequestDto>({ cmd: CHAT_COMMANDS.SAVE_MESSAGE }, {
           sender: senderUsername,
+          receiver,
           content,
-        });
+        }));
+
+        console.log('saveMessageResponse', saveMessageResponse);
+
+        if (saveMessageResponse && saveMessageResponse.status === 200) {
+          this.server.to(receiverSocketIds).emit(SOCKET_EVENTS.EMIT_MESSAGE, {
+            sender: senderUsername,
+            content,
+          });
+        }
       }
     } catch (error) {
       console.error('Error in handleMessage:', error);
