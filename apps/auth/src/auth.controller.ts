@@ -11,16 +11,21 @@ export class AuthController {
   @MessagePattern({ cmd: AUTH_COMMANDS.REGISTER })
   @UseFilters(new CustomRpcExceptionFilter())
   async register(data: { username: string; password: string }) {
-    return this.authService.register(data);
+    return await this.authService.register(data);
   }
 
   @MessagePattern({ cmd: AUTH_COMMANDS.VALIDATE_USER })
   async validateUser(data: { username: string; password: string }) {
-    return this.authService.validateUser(data);
+    return await this.authService.validateUser(data);
   }
 
   @MessagePattern({ cmd: AUTH_COMMANDS.GENERATE_TOKEN })
   async generateToken(data: { username: string }) {
-    return this.authService.generateToken(data);
+    return await this.authService.generateToken(data);
+  }
+
+  @MessagePattern({ cmd: AUTH_COMMANDS.VALIDATE_TOKEN })
+  async validateToken(data: { token: string }) {
+    return await this.authService.validateToken(data.token);
   }
 } 

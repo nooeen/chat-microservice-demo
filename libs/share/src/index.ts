@@ -14,3 +14,7 @@ export * from './base/service/base.service.abstract'
 export * from './modules/configuration/configuration.module'
 export * from './modules/database/database.module'
 export * from './modules/redis/redis.module'
+
+// Filters
+export * from './filters/ws-exception.filter'
+export * from './filters/rpc-exception.filter'

@@ -9,7 +9,8 @@ export function rabbitmqConfigSchema(
 ) {
   let keys: { [x in keyof RabbitMQConfigType]: string } = {
     uri: "URI",
-    queue: "QUEUE",
+    authQueue: "AUTH_QUEUE",
+    chatQueue: "CHAT_QUEUE",
   };
 
   if (configPrefix != "") {
@@ -24,7 +25,8 @@ export function rabbitmqConfigSchema(
 
   const schema = {};
   schema[`${keys.uri}`] = HOST_SCHEMA.default("localhost");
-  schema[`${keys.queue}`] = Joi.string().default("");
+  schema[`${keys.authQueue}`] = Joi.string().default("");
+  schema[`${keys.chatQueue}`] = Joi.string().default("");
 
   if (required) {
     for (const key in schema) {

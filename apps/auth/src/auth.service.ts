@@ -25,9 +25,10 @@ export class AuthService {
   }
 
   async validateUser(user: { username: string; password: string }) {
-    const userExists = await this.userService.findOne({ filter: { username: user.username } });
-    if (!userExists) {
-      throw new RpcException({
+    try {
+      const userExists = await this.userService.findOne({ filter: { username: user.username } });
+      if (!userExists) {
+        throw new RpcException({
         statusCode: 400,
         message: 'User not found',
       });
@@ -40,7 +41,14 @@ export class AuthService {
       });
     }
 
-    return userExists;
+    return {
+        statusCode: 200,
+        message: 'User validated',
+        user: userExists,
+      };
+    } catch (error) {
+      return error;
+    }
   }
 
   async generateToken(user: { username: string }) {
@@ -48,5 +56,16 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async validateToken(token: string) {
+    try {
+      return this.jwtService.verify(token);
+    } catch (error) {
+      throw new RpcException({
+        statusCode: 400,
+        message: 'Invalid token',
+      });
+    }
   }
 } 

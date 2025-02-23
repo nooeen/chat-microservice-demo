@@ -2,8 +2,8 @@ import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiService } from './api.service';
 import { API_PATHS } from '@app/share';
 import { RegisterBodyDto } from './dto/register-body.dto';
-import { LocalAuthGuard } from '@app/share/guards/local.guard';
-import { JwtAuthGuard } from '@app/share/guards/jwt.guard';
+import { LocalAuthGuard } from 'apps/api/src/guards/local.guard';
+import { JwtAuthGuard } from 'apps/api/src/guards/jwt.guard';
 @Controller()
 export class ApiController {
   constructor(private readonly apiService: ApiService) {}

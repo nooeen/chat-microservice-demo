@@ -3,11 +3,16 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
   WebSocketGateway,
-  WebSocketServer
+  WebSocketServer,
+  WsException
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '@app/share/modules/redis/redis.service';
-import { REDIS_HASH_KEYS } from '@app/share';
+import { MICROSERVICE_KEYS, REDIS_HASH_KEYS, AUTH_COMMANDS, CustomWsExceptionsFilter } from '@app/share';
+import { Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { JwtAuthGuard } from 'apps/api/src/guards/jwt.guard';
 
 interface SocketPayload {
   userId?: string;
@@ -15,12 +20,16 @@ interface SocketPayload {
 }
 
 @WebSocketGateway()
+@UseFilters(new CustomWsExceptionsFilter())
 export class SocketGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly redisService: RedisService) { }
+  constructor(
+    @Inject(MICROSERVICE_KEYS.AUTH) private readonly authClient: ClientProxy, 
+    private readonly redisService: RedisService
+  ) {}
 
   async afterInit(server: any) {
     console.log('--------------------------------');
@@ -30,17 +39,34 @@ export class SocketGateway
 
   // On User Connect
   async handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId;
+    const bearerToken = client.handshake.headers.authorization;
 
-    await this.addSocketId(userId as string, client.id);
+    try {
+      const validateToken = await firstValueFrom(
+        this.authClient.send({ cmd: AUTH_COMMANDS.VALIDATE_TOKEN }, { token: bearerToken })
+      );
 
-    console.log(`Connected with:`, userId);
+      if (!validateToken) {
+        client.disconnect();
+        throw new WsException('Invalid token');
+      }
 
-    const receiverSocketId = await this.getSocketId(userId as string);
-    if (receiverSocketId)
-      this.server.to(receiverSocketId).emit('connected_instance', {
-        instance: process.env.NODE_INSTANCE_ID,
-      });
+      const userId = client.handshake.query.userId;
+
+      await this.addSocketId(userId as string, client.id);
+
+      console.log(`Connected with:`, userId);
+
+      const receiverSocketId = await this.getSocketId(userId as string);
+      if (receiverSocketId)
+        this.server.to(receiverSocketId).emit('connected_instance', {
+          instance: process.env.NODE_INSTANCE_ID,
+        });
+
+    } catch (error) {
+      client.disconnect();
+      throw new WsException('Invalid token');
+    }
   }
 
   // On User Disconnect

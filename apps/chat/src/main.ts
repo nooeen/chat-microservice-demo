@@ -24,15 +24,12 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).uri],
-        queue: configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).queue,
+        queue: configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).chatQueue,
         queueOptions: {
           durable: true,
         },
       },
-    },
-    {
-      inheritAppConfig: true,
-    },
+    }
   );
 
   await app.startAllMicroservices();

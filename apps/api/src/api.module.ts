@@ -7,27 +7,30 @@ import { ClientsModule } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMQConfigType } from '@app/share/modules/configuration/configs/rabbitmq.config';
 import { CONFIG_KEYS } from '@app/share';
-import { LocalStrategy } from '../../../libs/share/src/guards/local.strategy';
-import { JwtStrategy } from '../../../libs/share/src/guards/jwt.strategy';
-import { SocketGateway } from './gateways/socket.gateway';
+import { LocalStrategy } from './guards/local.strategy';
+import { JwtStrategy } from './guards/jwt.strategy';
+import { SocketGateway } from './socket.gateway';
 
 @Module({
-  imports: [ShareModule, RedisModule, ClientsModule.registerAsync([
-    {
-      name: MICROSERVICE_KEYS.AUTH,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        transport: Transport.RMQ,
-        options: {
-          urls: [configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).uri],
-          queue: configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).queue,
-          queueOptions: {
-            durable: true,
+  imports: [
+    ShareModule, 
+    RedisModule, 
+    ClientsModule.registerAsync([
+      {
+        name: MICROSERVICE_KEYS.AUTH,
+        inject: [ConfigService],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).uri],
+            queue: configService.get<RabbitMQConfigType>(CONFIG_KEYS.RABBITMQ).authQueue,
+            queueOptions: {
+              durable: true,
+            },
           },
-        },
-      }),
-    },
-  ]),
+        }),
+      },
+    ]),
   ],
   controllers: [ApiController],
   providers: [ApiService, LocalStrategy, JwtStrategy, SocketGateway],

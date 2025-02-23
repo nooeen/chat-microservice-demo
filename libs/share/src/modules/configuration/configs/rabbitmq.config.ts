@@ -2,7 +2,8 @@ import { CONFIG_KEYS } from "@app/share/common/constants";
 
 export type RabbitMQConfigType = {
   uri: string;
-  queue: string;
+  authQueue: string;
+  chatQueue: string;
 };
 
 export const buildRabbitMQConfig = (
@@ -12,7 +13,8 @@ export const buildRabbitMQConfig = (
 ) => {
   let keys: { [x in keyof RabbitMQConfigType]: string } = {
     uri: "URI",
-    queue: "QUEUE",
+    authQueue: "AUTH_QUEUE",
+    chatQueue: "CHAT_QUEUE",
   };
 
   if (configPrefix != "") {
@@ -28,7 +30,8 @@ export const buildRabbitMQConfig = (
   const config = {};
   config[configKeymap] = {
     uri: process.env[keys.uri],
-    queue: process.env[keys.queue],
+    authQueue: process.env[keys.authQueue],
+    chatQueue: process.env[keys.chatQueue],
   };
 
   return config;

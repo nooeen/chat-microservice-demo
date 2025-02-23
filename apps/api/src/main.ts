@@ -7,6 +7,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { RedisIoAdapter } from './redis-io.adapter';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { CustomWsExceptionsFilter } from '@app/share';
 
 
 async function bootstrap() {
@@ -24,9 +25,9 @@ async function bootstrap() {
     })
   );
 
-  const redisIoAdapter = new RedisIoAdapter(configService);
-  await redisIoAdapter.connectToRedis();
-  app.useWebSocketAdapter(redisIoAdapter);
+  // const redisIoAdapter = new RedisIoAdapter(configService);
+  // await redisIoAdapter.connectToRedis();
+  // app.useWebSocketAdapter(redisIoAdapter);
 
   app.enableCors({
     origin: true,
