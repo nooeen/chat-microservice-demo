@@ -14,6 +14,10 @@ class RecentConversation {
   conversation_id: string;
 
   @IsString()
+  @IsNotEmpty()
+  username: string;
+
+  @IsString()
   last_message: string;
 
   @IsString()

@@ -13,6 +13,7 @@ interface RegisterResponse {
 
 interface Conversation {
   conversation_id: string;
+  username: string;
   last_message: string;
   last_sender: string;
 }
@@ -27,6 +28,14 @@ interface ActiveUser {
 
 interface GetActiveUsersResponse {
   usernames: string[];
+}
+
+interface GetConversationResponse {
+  messages: Array<{
+    sender: string;
+    content: string;
+    timestamp?: string;
+  }>;
 }
 
 const hashPassword = async (password: string): Promise<string> => {
@@ -118,6 +127,29 @@ export const apiClient = {
 
     if (!response.ok) {
       throw new Error(data.message || 'Failed to fetch active users');
+    }
+
+    return data;
+  },
+
+  getConversation: async (username: string): Promise<GetConversationResponse> => {
+    const jwt = localStorage.getItem('jwt');
+    if (!jwt) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(`${API_URL}/conversation?username=${username}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch conversation');
     }
 
     return data;

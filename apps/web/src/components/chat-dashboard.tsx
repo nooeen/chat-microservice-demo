@@ -11,15 +11,31 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AuthModals } from "./auth-modals"
 import { apiClient } from "@/lib/api-client"
+import { socketService } from "@/lib/socket-service"
+
+interface Message {
+  sender: string;
+  content: string;
+  timestamp?: string;
+}
 
 interface Conversation {
   conversation_id: string;
+  username: string;
   last_message: string;
   last_sender: string;
 }
 
 interface ActiveUser {
   username: string;
+}
+
+function decodeJwt(token: string) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
 }
 
 export default function ChatDashboard() {
@@ -29,6 +45,10 @@ export default function ChatDashboard() {
   const [loading, setLoading] = useState(false)
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
   const [loadingActiveUsers, setLoadingActiveUsers] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [newMessage, setNewMessage] = useState("")
+  const [currentUsername, setCurrentUsername] = useState<string>("")
 
   useEffect(() => {
     const jwt = localStorage.getItem('jwt')
@@ -52,6 +72,42 @@ export default function ChatDashboard() {
     }
   }, [isAuthenticated]) // Only re-run effect if isAuthenticated changes
 
+  // Connect to WebSocket when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const token = localStorage.getItem('jwt')
+      if (token) {
+        const socket = socketService.connect(token)
+        
+        socket.on('emit_message', (message: Message) => {
+          setMessages(prev => [...prev, message])
+        })
+
+        // Cleanup on unmount
+        return () => {
+          socketService.disconnect()
+        }
+      }
+    }
+  }, [isAuthenticated])
+
+  // Fetch conversation messages when user is selected
+  useEffect(() => {
+    if (selectedUser) {
+      fetchConversation(selectedUser)
+    }
+  }, [selectedUser])
+
+  useEffect(() => {
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      const decoded = decodeJwt(jwt);
+      if (decoded?.username) {
+        setCurrentUsername(decoded.username);
+      }
+    }
+  }, []);
+
   const fetchRecentConversations = async () => {
     try {
       setLoading(true)
@@ -74,6 +130,41 @@ export default function ChatDashboard() {
     } finally {
       setLoadingActiveUsers(false)
     }
+  }
+
+  const fetchConversation = async (username: string) => {
+    try {
+      const response = await apiClient.getConversation(username)
+      setMessages(response.messages)
+    } catch (error) {
+      console.error('Failed to fetch conversation:', error)
+    }
+  }
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedUser || !newMessage.trim()) return
+
+    const socket = socketService.getSocket()
+    if (socket) {
+      socket.emit('on_message', JSON.stringify({
+        receiver: selectedUser,
+        content: newMessage
+      }))
+      
+      // Optimistically add message to UI
+      setMessages(prev => [...prev, {
+        sender: currentUsername,
+        content: newMessage
+      }])
+      
+      setNewMessage("")
+    }
+  }
+
+  const handleUserSelect = (username: string) => {
+    setSelectedUser(username)
+    fetchConversation(username) // Fetch conversation history when selecting any user
   }
 
   return (
@@ -122,16 +213,20 @@ export default function ChatDashboard() {
                   conversations.map((conversation) => (
                     <button
                       key={conversation.conversation_id}
-                      className="flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors"
+                      onClick={() => handleUserSelect(conversation.username)}
+                      className={`flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors ${
+                        selectedUser === conversation.username ? 'bg-muted' : ''
+                      }`}
                     >
                       <Avatar className="h-10 w-10">
-                        <AvatarFallback>{conversation.last_sender[0].toUpperCase()}</AvatarFallback>
+                        <AvatarFallback>{conversation.username[0].toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col items-start gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{conversation.last_sender}</span>
+                          <span className="text-sm font-medium">{conversation.username}</span>
                         </div>
                         <span className="text-xs text-muted-foreground line-clamp-1">
+                          {conversation.last_sender === 'me' ? 'You: ' : `${conversation.last_sender}: `}
                           {conversation.last_message}
                         </span>
                       </div>
@@ -155,7 +250,10 @@ export default function ChatDashboard() {
                   activeUsers.map((user) => (
                     <button
                       key={user.username}
-                      className="flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors"
+                      onClick={() => handleUserSelect(user.username)}
+                      className={`flex items-center gap-4 w-full p-4 hover:bg-muted/50 transition-colors ${
+                        selectedUser === user.username ? 'bg-muted' : ''
+                      }`}
                     >
                       <div className="relative">
                         <Avatar className="h-10 w-10">
@@ -178,16 +276,17 @@ export default function ChatDashboard() {
         {/* Chat Area */}
         <div className="flex-1 flex flex-col">
           {/* Chat Header */}
-          <div className="flex items-center gap-4 border-b p-4 bg-background">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src="/avatars/01.png" />
-              <AvatarFallback>SC</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">Sarah Chen</span>
-              <span className="text-xs text-muted-foreground">Online</span>
+          {selectedUser && (
+            <div className="flex items-center gap-4 border-b p-4 bg-background">
+              <Avatar className="h-10 w-10">
+                <AvatarFallback>{selectedUser[0].toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{selectedUser}</span>
+                <span className="text-xs text-muted-foreground">Online</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Messages */}
           <ScrollArea className="flex-1 p-4">
@@ -195,59 +294,56 @@ export default function ChatDashboard() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex items-end gap-2 ${message.sender === "me" ? "flex-row-reverse" : ""}`}
+                  className={`flex items-end gap-2 ${
+                    message.sender === currentUsername ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  {message.sender !== "me" && (
+                  {message.sender !== currentUsername && (
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/avatars/01.png" />
-                      <AvatarFallback>SC</AvatarFallback>
+                      <AvatarFallback>{message.sender[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
                   )}
                   <div
-                    className={`rounded-lg px-4 py-2 max-w-[80%] ${message.sender === "me" ? "bg-primary text-primary-foreground" : "bg-muted"
-                      }`}
+                    className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                      message.sender === currentUsername
+                        ? "bg-primary text-primary-foreground rounded-tr-none"
+                        : "bg-muted rounded-tl-none"
+                    }`}
                   >
                     <p className="text-sm">{message.content}</p>
                   </div>
-                  <span className="text-[10px] text-muted-foreground self-end">{message.time}</span>
+                  {message.sender === currentUsername && (
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>{currentUsername[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
+                  {message.timestamp && (
+                    <span className="text-[10px] text-muted-foreground self-end">
+                      {message.timestamp}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
           </ScrollArea>
 
           {/* Input */}
-          <div className="border-t p-4 bg-background">
-            <form className="flex gap-2">
-              <Input className="flex-1" placeholder="Type a message..." />
-              <Button>Send</Button>
-            </form>
-          </div>
+          {selectedUser && (
+            <div className="border-t p-4 bg-background">
+              <form className="flex gap-2" onSubmit={handleSendMessage}>
+                <Input 
+                  className="flex-1" 
+                  placeholder="Type a message..." 
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                />
+                <Button type="submit" disabled={!newMessage.trim()}>Send</Button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
-
-const messages = [
-  {
-    sender: "them",
-    content: "Hey! How's the project coming along?",
-    time: "10:00 AM",
-  },
-  {
-    sender: "me",
-    content: "It's going well! I've completed the initial designs",
-    time: "10:02 AM",
-  },
-  {
-    sender: "them",
-    content: "That's great to hear! Could you share them with me?",
-    time: "10:03 AM",
-  },
-  {
-    sender: "me",
-    content: "Of course! I'll send you the files shortly",
-    time: "10:05 AM",
-  },
-]
 

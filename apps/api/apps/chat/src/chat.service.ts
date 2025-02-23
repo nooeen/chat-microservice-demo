@@ -129,6 +129,7 @@ export class ChatService {
 
         return {
           conversation_id: conversation._id.toString(),
+          username: conversation.username_1 === username ? conversation.username_2 : conversation.username_1,
           last_message: lastMessage.content,
           last_sender: lastMessage.sender,
         };
