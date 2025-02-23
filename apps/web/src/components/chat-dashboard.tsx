@@ -17,6 +17,7 @@ interface Message {
   sender: string;
   content: string;
   timestamp?: string;
+  receiver?: string;
 }
 
 interface Conversation {
@@ -83,7 +84,33 @@ export default function ChatDashboard() {
         const socket = socketService.connect(token)
         
         socket.on('emit_message', (message: Message) => {
-          setMessages(prev => [...prev, message])
+          // Only update messages if we're in the relevant conversation
+          if (selectedUser && (message.sender === selectedUser || message.receiver === selectedUser)) {
+            setMessages(prev => [...prev, message])
+          }
+
+          // Update conversations list with the new message
+          setConversations(prev => {
+            const otherUser = message.sender === currentUsername ? message.receiver : message.sender
+            const existingConvIndex = prev.findIndex(conv => conv.username === otherUser)
+
+            const updatedConv = {
+              conversation_id: existingConvIndex >= 0 ? prev[existingConvIndex].conversation_id : Date.now().toString(),
+              username: otherUser || '',
+              last_message: message.content,
+              last_sender: message.sender === currentUsername ? 'me' : message.sender
+            }
+
+            if (existingConvIndex >= 0) {
+              // Update existing conversation
+              const newConvs = [...prev]
+              newConvs[existingConvIndex] = updatedConv
+              return newConvs
+            } else {
+              // Add new conversation
+              return [updatedConv, ...prev]
+            }
+          })
         })
 
         // Cleanup on unmount
@@ -92,7 +119,7 @@ export default function ChatDashboard() {
         }
       }
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, selectedUser, currentUsername])
 
   // Fetch conversation messages when user is selected
   useEffect(() => {
@@ -172,10 +199,10 @@ export default function ChatDashboard() {
       }))
       
       // Optimistically add message to UI
-      // setMessages(prev => [...prev, {
-      //   sender: currentUsername,
-      //   content: newMessage
-      // }])
+      setMessages(prev => [...prev, {
+        sender: currentUsername,
+        content: newMessage
+      }])
       
       setNewMessage("")
     }
@@ -191,7 +218,14 @@ export default function ChatDashboard() {
       {/* Header */}
       <header className="border-b px-6 py-3 flex items-center justify-between bg-background">
         <h1 className="text-xl font-semibold">Chat App</h1>
-        <AuthModals onLogin={() => setIsAuthenticated(true)} />
+        <div className="flex items-center gap-4">
+          {isAuthenticated && currentUsername && (
+            <span className="text-sm text-muted-foreground">
+              Logged in as <span className="font-medium text-foreground">{currentUsername}</span>
+            </span>
+          )}
+          <AuthModals onLogin={() => setIsAuthenticated(true)} />
+        </div>
       </header>
 
       {/* Main Content */}
