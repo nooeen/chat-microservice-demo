@@ -39,7 +39,8 @@ export const SOCKET_EVENTS = {
   PING: 'ping',
   CONNECTED_INSTANCE: 'connected_instance',
   ONLINE_USERS: 'online_users',
-  MESSAGE: 'message',
+  ON_MESSAGE: 'on_message',
+  EMIT_MESSAGE: 'emit_message',
 } as const;
 
 export const CACHE_1S = 1; //1

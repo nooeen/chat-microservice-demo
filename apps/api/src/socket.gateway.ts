@@ -28,9 +28,9 @@ export class SocketGateway
   server: Server;
 
   constructor(
-    @Inject(MICROSERVICE_KEYS.AUTH) private readonly authClient: ClientProxy, 
+    @Inject(MICROSERVICE_KEYS.AUTH) private readonly authClient: ClientProxy,
     private readonly redisService: RedisService
-  ) {}
+  ) { }
 
   async afterInit(server: any) {
     console.log('--------------------------------');
@@ -60,11 +60,10 @@ export class SocketGateway
       console.log(`Connected with:`, username);
 
       const receiverSocketIds = await this.getSocketIds(username);
-      console.log('receiverSocketIds', receiverSocketIds);
       if (receiverSocketIds)
         this.server.to(receiverSocketIds).emit('connected_instance', {
           instance: process.env.NODE_INSTANCE_ID,
-      });
+        });
 
     } catch (error) {
       console.error('Error in handleConnection:', error);
@@ -99,19 +98,27 @@ export class SocketGateway
     client.emit(SOCKET_EVENTS.PING, 'pong');
   }
 
-  @SubscribeMessage(SOCKET_EVENTS.MESSAGE)
+  @SubscribeMessage(SOCKET_EVENTS.ON_MESSAGE)
   async handleMessage(client: Socket, message: any) {
-    const sender = message.sender;
-    const receiver = message.receiver;
-    const content = message.message;
+    try {
+      const senderSocketId = client.id;
 
-    const receiverSocketIds = await this.getSocketIds(receiver);
-    if (receiverSocketIds) {
-      this.server.to(receiverSocketIds).emit(SOCKET_EVENTS.MESSAGE, {
-        sender,
-        receiver,
-        content
-      });
+      const messageObject = JSON.parse(message);
+
+      const receiver = messageObject['receiver'];
+      const content = messageObject['content'];
+
+      const senderUsername = await this.getUsername(senderSocketId);
+      const receiverSocketIds = await this.getSocketIds(receiver);
+
+      if (receiverSocketIds) {
+        this.server.to(receiverSocketIds).emit(SOCKET_EVENTS.EMIT_MESSAGE, {
+          sender: senderUsername,
+          content,
+        });
+      }
+    } catch (error) {
+      console.error('Error in handleMessage:', error);
     }
   }
 
@@ -158,7 +165,7 @@ export class SocketGateway
   async checkOnlineUsers() {
     try {
       const allUserSocketMappings = await this.redisService.hgetall(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING);
-      
+
       if (!allUserSocketMappings) return;
 
       // Check each user's socket connections
@@ -173,19 +180,19 @@ export class SocketGateway
           // If no active sockets, remove user from Redis
           await this.redisService.hdel(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, username);
           // Clean up socket-user mapping for all inactive sockets
-          await Promise.all(socketIds.map(socketId => 
+          await Promise.all(socketIds.map(socketId =>
             this.redisService.hdel(REDIS_HASH_KEYS.SOCKET_USER_MAPPING, socketId)
           ));
         } else if (activeSocketIds.length !== socketIds.length) {
           // Update Redis with only active socket IDs
           await this.redisService.hset(
-            REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, 
-            username, 
+            REDIS_HASH_KEYS.USER_SOCKETS_MAPPING,
+            username,
             JSON.stringify(activeSocketIds)
           );
           // Clean up socket-user mapping for inactive sockets
           const inactiveSocketIds = socketIds.filter(id => !activeSocketIds.includes(id));
-          await Promise.all(inactiveSocketIds.map(socketId => 
+          await Promise.all(inactiveSocketIds.map(socketId =>
             this.redisService.hdel(REDIS_HASH_KEYS.SOCKET_USER_MAPPING, socketId)
           ));
         }
