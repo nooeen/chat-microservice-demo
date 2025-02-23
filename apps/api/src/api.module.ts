@@ -9,7 +9,7 @@ import { RabbitMQConfigType } from '@app/share/modules/configuration/configs/rab
 import { CONFIG_KEYS } from '@app/share';
 import { LocalStrategy } from '../../../libs/share/src/guards/local.strategy';
 import { JwtStrategy } from '../../../libs/share/src/guards/jwt.strategy';
-import { SocketGateway } from './socket/socket.gateway';
+import { SocketGateway } from './gateways/socket.gateway';
 
 @Module({
   imports: [ShareModule, RedisModule, ClientsModule.registerAsync([

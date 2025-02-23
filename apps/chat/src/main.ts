@@ -36,8 +36,6 @@ async function bootstrap() {
   );
 
   await app.startAllMicroservices();
-  await app.listen(process.env.CHAT_PORT ?? 3001);
-  console.log(`---------- CHAT_PORT: ${process.env.CHAT_PORT ?? 3001} ----------`);
 }
 
 bootstrap();

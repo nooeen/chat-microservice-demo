@@ -4,10 +4,14 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { RedisIoAdapter } from './socket/redis-io.adapter';
+import { RedisIoAdapter } from './redis-io.adapter';
 import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
+
 
 async function bootstrap() {
+  process.env.NODE_INSTANCE_ID = crypto.randomBytes(16).toString('hex');
+
   const app = await NestFactory.create<NestExpressApplication>(ApiModule, {
     cors: true,
   });

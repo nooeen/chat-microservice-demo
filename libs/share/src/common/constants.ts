@@ -25,6 +25,12 @@ export const AUTH_COMMANDS = {
   VALIDATE_TOKEN: "validate-token",
 };
 
+export const REDIS_HASH_KEYS = {
+  USER_SOCKETS_MAPPING: 'user_sockets_mapping',
+  SOCKET_USER_MAPPING: 'socket_user_mapping',
+} as const;
+
+
 export const CACHE_1S = 1; //1
 export const CACHE_2S = 2; //2
 export const CACHE_5M = 300; //5*60

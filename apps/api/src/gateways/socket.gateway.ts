@@ -1,4 +1,3 @@
-import { Inject } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -8,7 +7,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { RedisService } from '@app/share/modules/redis/redis.service';
-import { REDIS_HASH_KEYS } from '../../../chat/src/constants';
+import { REDIS_HASH_KEYS } from '@app/share';
 
 interface SocketPayload {
   userId?: string;
@@ -23,8 +22,10 @@ export class SocketGateway
 
   constructor(private readonly redisService: RedisService) { }
 
-  afterInit(server: any) {
-    console.log('Method not implemented.');
+  async afterInit(server: any) {
+    console.log('--------------------------------');
+    console.log('Socket Gateway Initialized');
+    console.log('--------------------------------');
   }
 
   // On User Connect
@@ -50,21 +51,21 @@ export class SocketGateway
 
   // Add socketId with userId in Redis
   async addSocketId(userId: string, socketId: string): Promise<void> {
-    const socketIdsStr = await this.redisService.hget(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId);
+    const socketIdsStr = await this.redisService.hget(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId);
     let socketIds = socketIdsStr ? JSON.parse(socketIdsStr) : [];
 
     if (Array.isArray(socketIds) && socketIds.length) {
       socketIds.push(socketId);
-      await this.redisService.hset(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId, JSON.stringify([...new Set(socketIds)]));
+      await this.redisService.hset(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId, JSON.stringify([...new Set(socketIds)]), 3600);
     } else {
-      await this.redisService.hset(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId, JSON.stringify([socketId]));
+      await this.redisService.hset(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId, JSON.stringify([socketId]), 3600);
     }
-    await this.redisService.hset(REDIS_HASH_KEYS.SOCKET_USER_MAPPING, socketId, userId);
+    await this.redisService.hset(REDIS_HASH_KEYS.SOCKET_USER_MAPPING, socketId, userId, 3600);
   }
 
   // Get socketId using userId
   async getSocketId(userId: string): Promise<string[] | null> {
-    const socketIds = await this.redisService.hget(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId);
+    const socketIds = await this.redisService.hget(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId);
     return socketIds ? JSON.parse(socketIds) : null;
   }
 
@@ -77,16 +78,16 @@ export class SocketGateway
   // No active connection then remove userId from Redis
   async removeUserId(socketId: string): Promise<string> {
     const userId = await this.getUserId(socketId);
-    const socketIdsStr = await this.redisService.hget(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId);
+    const socketIdsStr = await this.redisService.hget(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId);
     const socketIds = socketIdsStr ? JSON.parse(socketIdsStr) : null;
 
     if (socketIds) {
       const updatedSocketIds = socketIds.filter((id) => id !== socketId);
 
       if (updatedSocketIds.length > 0) {
-        await this.redisService.hset(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId, JSON.stringify(updatedSocketIds));
+        await this.redisService.hset(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId, JSON.stringify(updatedSocketIds));
       } else {
-        await this.redisService.hdel(REDIS_HASH_KEYS.USER_SOCKET_MAPPING, userId);
+        await this.redisService.hdel(REDIS_HASH_KEYS.USER_SOCKETS_MAPPING, userId);
       }
     }
     await this.redisService.hdel(REDIS_HASH_KEYS.SOCKET_USER_MAPPING, socketId);
